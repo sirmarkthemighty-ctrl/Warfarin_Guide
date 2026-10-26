@@ -1,0 +1,20 @@
+Warfarin Planner
+Copyright (c) 2026 Warodom Phaenthong, M.D.
+
+This work (the app, its source code, text and tables) is licensed under the
+Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International License (CC BY-NC-SA 4.0).
+The full licence text is in the LICENSE file and at
+https://creativecommons.org/licenses/by-nc-sa/4.0/
+
+In short: you may share and adapt this work for non-commercial purposes, provided you credit the
+author, link to the licence, say what you changed, and release your version under the same licence.
+
+No warranty. The planner is a teaching aid for healthcare professionals. It does not replace
+clinical judgement, local protocols or the product information.
+
+Dosing and reversal guidance comes from published guidelines that the app names, including the
+Thai warfarin guideline (2010), CHEST, ASH, ACC, AHA/ASA, ESC and NICE. Those sources keep their
+own copyright.
+
+The app loads the IBM Plex fonts from Google Fonts (SIL Open Font License 1.1). It uses no other
+third-party software.
