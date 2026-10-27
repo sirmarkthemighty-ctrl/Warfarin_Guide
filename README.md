@@ -19,7 +19,9 @@ It is a teaching aid for healthcare professionals, not a substitute for clinical
 - Pick the tablet strengths in stock and allow halves. Swap doses between days, or build the week tablet by tablet by
   dragging from the tablet tray (mouse or touch).
 - TTR calculator (Rosendaal) from dated INRs, with ESC 2024 and NICE NG196 prompts.
-- Thai / English switch, six sample cases, print and copy.
+- Thai / English switch, six sample cases, print, download as PNG, and copy.
+- Foods & INR: foods and herbs that may raise or lower the INR, and vitamin K per 100 g in common foods, also on
+  the lower half of the printed patient sheet.
 
 **Detailed view** covers the full plan: INR-guided dose adjustment, drug-interaction adjustment, when to stop before
 procedures, and reversal with vitamin K, FFP and PCC, for OPD and IPD (CHEST 2012/2022, ASH 2018, ACC 2020,

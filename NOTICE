@@ -16,5 +16,7 @@ Dosing and reversal guidance comes from published guidelines that the app names,
 Thai warfarin guideline (2010), CHEST, ASH, ACC, AHA/ASA, ESC and NICE. Those sources keep their
 own copyright.
 
-The app loads the IBM Plex fonts from Google Fonts (SIL Open Font License 1.1). It uses no other
-third-party software.
+Third-party software:
+- IBM Plex fonts, loaded from Google Fonts (SIL Open Font License 1.1).
+- html2canvas-pro 1.5.8 by yorickshan, a fork of html2canvas by Niklas von Hertzen (MIT License),
+  loaded from jsDelivr only when "Download PNG" is pressed. https://github.com/yorickshan/html2canvas-pro

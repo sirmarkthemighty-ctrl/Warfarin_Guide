@@ -598,9 +598,15 @@ body[data-mode="simple"] .pgrefs{max-width:1100px;padding-bottom:28px}
   body.sm-print .sm-food h3{font:700 15px/1.3 var(--sans);margin:0 0 4px}
   body.sm-print .sm-food .fp-na{margin-top:4px;font-style:italic;color:#444}
   body.sm-print .sm-food .fp-tip{margin:0 0 6px}
-  body.sm-print .sm-food .fp-cols{display:grid;grid-template-columns:1.25fr 1fr 1fr;gap:10px}
-  body.sm-print .sm-food h4{font:700 12.5px/1.3 var(--sans);margin:0 0 3px;padding:2px 6px;border-radius:4px;-webkit-print-color-adjust:exact;print-color-adjust:exact}
-  body.sm-print .sm-food h4.vk{background:#fde2e2}body.sm-print .sm-food h4.up{background:#fff0d6}body.sm-print .sm-food h4.dn{background:#dbeafe}
+  body.sm-print .sm-food .fp-cols{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+  body.sm-print .sm-food .fp-col{border:2px solid var(--fc);border-radius:8px;padding:0 10px 8px;overflow:hidden}
+  body.sm-print .sm-food .fp-col.dn{--fc:#2563eb;--fb:#dbeafe}body.sm-print .sm-food .fp-col.up{--fc:#dc2626;--fb:#fde2e2}
+  body.sm-print .sm-food h4{font:700 14px/1.3 var(--sans);margin:0 -10px 6px;padding:5px 10px;background:var(--fb);color:#141722;display:flex;align-items:center;gap:8px;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  body.sm-print .sm-food h4 small{font-weight:500;font-size:11.5px;color:#444;margin-left:auto}
+  body.sm-print .sm-food .fp-ar{display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;border-radius:50%;background:var(--fc);color:#fff;font:800 15px/1 var(--sans);flex:none;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  body.sm-print .sm-food h5{font:700 12px/1.35 var(--sans);margin:6px 0 2px}
+  body.sm-print .sm-food .fp-two{columns:2;column-gap:14px}
+  body.sm-print .sm-food .fp-tip{padding:4px 8px;border-left:3px solid #141722;background:#f3f4f6;-webkit-print-color-adjust:exact;print-color-adjust:exact}
   body.sm-print .sm-food ul{margin:0;padding-left:14px}
   body.sm-print .sm-food li{margin:0 0 1px}
   body.sm-print .sm-food .fp-refs{margin-top:6px;font-size:9px;color:#555}
@@ -1869,7 +1875,7 @@ function renderSimpleCore(){
   h+='<div class="sm-legend"><b>'+L('ลักษณะเม็ดยา · Tablets','ลักษณะเม็ดยา')+'</b>'+[1,2,3,4,5].filter(s=>{const e=$('tabs').querySelector('input[value="'+s+'"]');return (e&&e.checked)||tot[s]>0;}).map(s=>`<span class="lg">${tpHtml(s,false,34)}<span><b>${s} ${MG}</b> ${TABC[s].nv?'<span class="sm-nv">'+L('colour not verified','ยังไม่ยืนยันสี')+'</span>':L(TABC[s].n+' · '+TABC[s].th,TABC[s].th)}</span></span>`).join('')+'</div>';
     h+='<div class="hint">'+L('Check the colours against the brand you dispense. Keep the odd-dose days on fixed weekdays; ½ = half, ¼ = a quarter of a tablet.','ตรวจสีเม็ดยากับยี่ห้อที่จ่ายจริง ให้วันที่ขนาดยาต่างจากวันอื่นเป็นวันเดิมทุกสัปดาห์; ½ = ครึ่งเม็ด, ¼ = หนึ่งในสี่เม็ด')+'</div>';
   h+='<div class="sm-food">'+foodPrintHtml()+'</div>';
-  h+='<div class="sm-actions noprint"><button type="button" class="btn pri" id="sPrint">'+L('Print table','พิมพ์ตาราง')+'</button><button type="button" class="btn" id="sCopy">'+L('Copy','คัดลอก')+'</button><button type="button" class="btn" data-food>'+L('Foods &amp; INR','อาหารกับ INR')+'</button><button type="button" class="btn" data-mode-set="detailed">'+L('Open in Detailed mode →','เปิดแบบละเอียด →')+'</button></div>';
+  h+='<div class="sm-actions noprint"><button type="button" class="btn pri" id="sPrint">'+L('Print table','พิมพ์ตาราง')+'</button><button type="button" class="btn" id="sPng">'+L('Download PNG','บันทึกเป็นรูป PNG')+'</button><button type="button" class="btn" id="sCopy">'+L('Copy','คัดลอก')+'</button><button type="button" class="btn" data-food>'+L('Foods &amp; INR','อาหารกับ INR')+'</button><button type="button" class="btn" data-mode-set="detailed">'+L('Open in Detailed mode →','เปิดแบบละเอียด →')+'</button></div>';
   $('sOut').innerHTML=h;
   placePop();
 }
@@ -1891,6 +1897,50 @@ function printTable(){
   window.addEventListener('afterprint',off);
   window.print();
   setTimeout(()=>{if(!window.matchMedia||!matchMedia('print').matches)off();},60000);   /* fallback if afterprint never fires */
+}
+/* Download the patient sheet as a PNG — the same layout as Print table.
+   The sheet is laid out in a hidden A4-wide frame whose CSS has every "@media print" block switched on,
+   then drawn with html2canvas-pro (MIT, loaded from jsDelivr only when the button is pressed).
+   The -pro fork is needed: plain html2canvas 1.4.1 stops on the color-mix() colours this app uses. */
+const H2C_URL='https://cdn.jsdelivr.net/npm/html2canvas-pro@1.5.8/dist/html2canvas-pro.min.js';
+let pngBusy=false;
+async function savePng(){
+  if(pngBusy)return;pngBusy=true;
+  const btn=$('sPng'),txt=btn&&btn.textContent;if(btn){btn.disabled=true;btn.textContent=L('Making image…','กำลังสร้างรูป…');}
+  const fr=document.createElement('iframe');
+  fr.setAttribute('aria-hidden','true');fr.tabIndex=-1;
+  fr.style.cssText='position:fixed;left:-10000px;top:0;width:794px;height:1123px;border:0;visibility:hidden';
+  document.body.appendChild(fr);
+  try{
+    /* print rules on; minus the one that hides every other child of <body> — html2canvas puts its working copy
+       of the page there, and hiding it gives a zero-width (blank) image. The frame holds only the sheet anyway. */
+    const css=[...document.querySelectorAll('style')].map(s=>s.textContent).join('\n').replace(/@media\s+print\b/g,'@media all')
+      .replace('body.sm-print>*:not(#simple){display:none!important}','');
+    const links=[...document.querySelectorAll('head link[rel="stylesheet"],head link[rel="preconnect"]')].map(n=>n.outerHTML).join('');
+    const d=fr.contentDocument;
+    d.open();
+    d.write('<!doctype html><html lang="'+(LANG==='th'?'th':'en')+'" data-theme="light"><head><meta charset="utf-8">'+links+'<style>'+css+'</style><style>body{margin:0;padding:28px 30px;width:794px;box-sizing:border-box}body.sm-print .sm-food ul{list-style:none;padding-left:2px}body.sm-print .sm-food li::before{content:"•";display:inline-block;width:12px}</style></head><body class="sm-print"><section class="simple" id="simple">'+$('sOut').outerHTML+'</section></body></html>');
+    d.close();
+    /* also needed (tested): in html2canvas's copy, the print rule ".sm-card:not(#sOut)" hides #sOut itself.
+       Without the class it can't apply; in print layout this card has no border or padding anyway. */
+    d.getElementById('sOut').classList.remove('sm-card');
+    const loadScript=()=>new Promise((ok,bad)=>{const s=d.createElement('script');s.src=H2C_URL;s.onload=ok;s.onerror=()=>bad(new Error('html2canvas'));d.head.appendChild(s);});
+    await Promise.all([loadScript(),d.fonts?d.fonts.ready:null]);
+    await new Promise(r=>setTimeout(r,150));
+    const body=d.body;
+    const canvas=await fr.contentWindow.html2canvas(body,{scale:2,backgroundColor:'#ffffff',width:794,windowWidth:794,windowHeight:1123,height:body.scrollHeight,logging:false,useCORS:true});
+    const blob=await new Promise(r=>canvas.toBlob(r,'image/png'));
+    if(!blob)throw new Error('toBlob');
+    const a=document.createElement('a'),url=URL.createObjectURL(blob);
+    a.href=url;a.download='warfarin-schedule-'+isoDay(0)+'.png';document.body.appendChild(a);a.click();a.remove();
+    setTimeout(()=>URL.revokeObjectURL(url),4000);
+    toast(L('Image saved: ','บันทึกรูปแล้ว: ')+a.download);
+  }catch(e){
+    toast(L('Could not make the image — check the internet connection (the image tool loads from jsDelivr), or use Print table.','สร้างรูปไม่ได้ — ตรวจสอบการเชื่อมต่ออินเทอร์เน็ต (เครื่องมือสร้างรูปโหลดจาก jsDelivr) หรือใช้ “พิมพ์ตาราง”'));
+  }finally{
+    fr.remove();pngBusy=false;
+    const b=$('sPng');if(b){b.disabled=false;b.textContent=txt||L('Download PNG','บันทึกเป็นรูป PNG');}
+  }
 }
 function placePop(){
   const pop=$('sPop'),pl=document.querySelector('#sOut .sm-pill.sel');if(!pop||!pl)return;
@@ -2050,6 +2100,7 @@ $('sOut').addEventListener('click',e=>{
   const d=e.target.closest('.sm-wd[data-day]');if(d){dayAct(+d.dataset.day);return;}
   if(e.target.id==='sReorder'){sPref=null;sPick=null;renderSimple();toast('Back to the suggested days');return;}
   if(e.target.id==='sPrint'){printTable();return;}
+  if(e.target.id==='sPng'){savePng();return;}
   if(e.target.id==='sCopy'){const txt=simpleText();(navigator.clipboard?navigator.clipboard.writeText(txt):Promise.reject()).then(()=>toast('Copied'),()=>{const ta=document.createElement('textarea');ta.value=txt;document.body.appendChild(ta);ta.select();try{document.execCommand('copy');toast('Copied');}catch(x){toast('Copy failed');}ta.remove();});}
 });
 
@@ -2279,21 +2330,21 @@ applyLang();
    v:null = no measured value found in either source → shown as "no data", never guessed. */
 const FOOD_VK=[
   {en:'Parsley',th:'พาร์สลีย์',v:1640,r:1,id:170416},
-  {en:'Spinach',th:'ผักปวยเล้ง',v:482.9,r:1,id:168462},
-  {en:'Sweet basil',th:'โหระพา',v:414.8,r:1,id:172232},
-  {en:'Kale',th:'คะน้าใบหยิก (เคล)',v:389.6,r:1,id:168421},
+  {en:'Spinach',th:'ผักปวยเล้ง',v:482.9,r:1,id:168462,pr:1},
+  {en:'Sweet basil',th:'โหระพา',v:414.8,r:1,id:172232,pr:1},
+  {en:'Kale',th:'คะน้าใบหยิก (เคล)',v:389.6,r:1,id:168421,pr:1},
   {en:'Garland chrysanthemum',th:'ตั้งโอ๋',v:350,r:1,id:169995},
-  {en:'Coriander leaves',th:'ผักชี',v:310,r:1,id:169997},
-  {en:'Sweet potato leaves',th:'ยอดมันเทศ',v:302.2,r:1,id:169303},
-  {en:'Mustard greens',th:'ผักกาดเขียว',v:257.5,r:1,id:169256},
+  {en:'Coriander leaves',th:'ผักชี',v:310,r:1,id:169997,pr:1},
+  {en:'Sweet potato leaves',th:'ยอดมันเทศ',v:302.2,r:1,id:169303,pr:1},
+  {en:'Mustard greens',th:'ผักกาดเขียว',v:257.5,r:1,id:169256,pr:1},
   {en:'Watercress',th:'สลัดน้ำ',v:250,r:1,id:170068},
-  {en:'Gymnema inodorum',th:'ผักเชียงดา',v:212.5,r:2},
-  {en:'Spring onion',th:'ต้นหอม',v:207,r:1,id:170005},
+  {en:'Gymnema inodorum',th:'ผักเชียงดา',v:212.5,r:2,pr:1},
+  {en:'Spring onion',th:'ต้นหอม',v:207,r:1,id:170005,pr:1},
   {en:'Soybean oil',th:'น้ำมันถั่วเหลือง',v:183.9,r:1,id:171411},
   {en:'Brussels sprouts',th:'กะหล่ำดาว',v:177,r:1,id:170383},
-  {en:'Green leaf lettuce',th:'ผักกาดหอม',v:126.3,r:1,id:169249},
+  {en:'Green leaf lettuce',th:'ผักกาดหอม',v:126.3,r:1,id:169249,pr:1},
   {en:'Romaine lettuce',th:'ผักกาดคอส',v:102.5,r:1,id:169247},
-  {en:'Broccoli',th:'บรอกโคลี',v:101.6,r:1,id:170379},
+  {en:'Broccoli',th:'บรอกโคลี',v:101.6,r:1,id:170379,pr:1},
   {en:'Chinese broccoli',th:'คะน้า',v:89.1,r:1,id:169404},
   {en:'Sauropus androgynus',th:'ผักหวานบ้าน',v:76.8,r:2},
   {en:'Clinacanthus nutans',th:'พญายอ (เสลดพังพอนตัวเมีย)',v:76.45,r:2},
@@ -2336,7 +2387,7 @@ const FOOD_UP=[
   {en:'Goji berry (Lycium barbarum)',th:'เก๋ากี้',ev:'p',r:4},
   {en:'Cranberry',th:'แครนเบอร์รี',ev:'th',r:5}];
 const FOOD_DN=[
-  {en:'Foods high in vitamin K, tube feeds',th:'อาหารที่มีวิตามิน K สูง อาหารทางสายยาง',ev:'hp',r:4},
+  {en:'Foods high in vitamin K, tube feeds',th:'อาหารที่มีวิตามิน K สูง อาหารทางสายยาง',pen:'Tube feeds',pth:'อาหารทางสายยาง',ev:'hp',r:4},
   {en:'Avocado (large amounts)',th:'อะโวคาโด (ปริมาณมาก)',ev:'hp',r:4},
   {en:'Soy milk',th:'นมถั่วเหลือง',ev:'p',r:4},
   {en:'Ginseng',th:'โสม',ev:'p',r:4},
@@ -2369,14 +2420,23 @@ function foodHtml(){
   return h;
 }
 /* lower half of the printed patient sheet: short lists only, sources at the bottom */
+/* Two columns by direction. Vitamin K vegetables (flag pr:1) are a sub-group of "lower INR" with their own
+   instruction — keep steady, don't stop — because stopping them suddenly raises the INR. No µg values here:
+   the patient needs the group, the clinician has the numbers in the popup. */
 function foodPrintHtml(){
-  const hi=FOOD_VK.filter(f=>f.v!=null&&f.v>=100);
-  const li=f=>`<li>${LANG==='th'?f.th:f.en}${f.v!=null?` <b>${fmt(f.v)}</b>`:''}</li>`;
-  return `<h3>${L('Foods and your INR','อาหารกับค่า INR')}</h3><div class="fp-tip">${fdTip().replace(/<sup[\s\S]*?<\/sup>/g,'')}</div><div class="fp-cols">`
-    +`<div><h4 class="vk">${L('High vitamin K — eat a steady amount (µg/100 g)','วิตามิน K สูง — กินให้สม่ำเสมอ (µg/100 ก.)')}</h4><ul>${hi.map(li).join('')}</ul>`
-    +`<div class="fp-na">${L('No measured value yet','ยังไม่มีค่าที่วัดได้')}: ${FOOD_VK.filter(f=>f.v==null).map(f=>LANG==='th'?f.th:f.en).join(', ')}</div></div>`
-    +`<div><h4 class="up">${L('May raise INR — avoid or ask first','อาจทำให้ INR สูง — เลี่ยงหรือถามก่อน')}</h4><ul>${FOOD_UP.map(li).join('')}</ul></div>`
-    +`<div><h4 class="dn">${L('May lower INR','อาจทำให้ INR ต่ำลง')}</h4><ul>${FOOD_DN.map(li).join('')}</ul></div></div>`
+  const nm=f=>LANG==='th'?(f.pth||f.th):(f.pen||f.en);
+  const ul=list=>`<ul>${list.map(f=>`<li>${nm(f)}</li>`).join('')}</ul>`;
+  const veg=FOOD_VK.filter(f=>f.pr), none=FOOD_VK.filter(f=>f.v==null);
+  return `<h3>${L('Foods and your INR','อาหารกับค่า INR')}</h3>`
+    +`<div class="fp-tip">${L('Do not drink alcohol. Ask your doctor or pharmacist before any new medicine, vitamin, supplement or herb. Tell the clinic if your diet changes a lot.','งดดื่มแอลกอฮอล์ ปรึกษาแพทย์หรือเภสัชกรก่อนใช้ยา วิตามิน อาหารเสริม หรือสมุนไพรใหม่ทุกชนิด และแจ้งคลินิกเมื่ออาหารเปลี่ยนไปมาก')}</div>`
+    +`<div class="fp-cols">`
+    +`<div class="fp-col dn"><h4><span class="fp-ar">↓</span>${L('May LOWER the INR <small>clot risk</small>','อาจทำให้ INR <u>ต่ำลง</u> <small>เสี่ยงลิ่มเลือด</small>')}</h4>`
+    +`<h5>${L('Green vegetables high in vitamin K — eat about the same amount every week; do not stop suddenly','ผักใบเขียวที่มีวิตามิน K สูง — กินปริมาณใกล้เคียงกันทุกสัปดาห์ อย่าหยุดกินทันที')}</h5>`
+    +`<ul class="fp-two">${veg.map(f=>`<li>${nm(f)}</li>`).join('')}</ul>`
+    +`<div class="fp-na">${L('No measured value yet','ยังไม่มีค่าที่วัดได้')}: ${none.map(nm).join(', ')}</div>`
+    +`<h5>${L('Ask before using','ปรึกษาก่อนใช้')}</h5>${ul(FOOD_DN)}</div>`
+    +`<div class="fp-col up"><h4><span class="fp-ar">↑</span>${L('May RAISE the INR <small>bleeding risk</small>','อาจทำให้ INR <u>สูงขึ้น</u> <small>เสี่ยงเลือดออก</small>')}</h4>`
+    +`<h5>${L('Avoid, or ask your doctor first','ควรเลี่ยง หรือปรึกษาแพทย์ก่อน')}</h5>${ul(FOOD_UP)}</div></div>`
     +`<div class="fp-refs">${L('Sources','แหล่งอ้างอิง')}: USDA FoodData Central SR Legacy; Rodseeda &amp; Chansamut, J Adv Pharm Technol Res 2026; CHEST 2012 (Ageno et al.) Table 1; Poowaruttanawiwit et al., Thai J Pharm Pract 2022; MedlinePlus “Taking warfarin” 2025.</div>`;
 }
 let fdReturn=null;
@@ -2401,7 +2461,7 @@ $('pgRefs').addEventListener('click',e=>{if(e.target.closest('a[data-food]'))e.p
 
 /* changelog */
 const changelogData=[
-  {version:'v1.10.0',date:'October 27, 2026',features:['Foods &amp; INR: a new button in the header (and next to Print in Simple mode) opens a popup listing foods and herbs that may raise the INR (e.g. fish oil, mango, grapefruit, goji berry, dong quai, cranberry, alcohol) or lower it (high vitamin K foods, avocado in large amounts, soy milk, ginseng, multivitamins), with the CHEST 2012 level of evidence, and a table of vitamin K (µg per 100 g) in 41 foods, including Thai vegetables such as คะน้า, ผักชี, โหระพา, ผักเชียงดา and ผักหวานบ้าน. Holy basil, ivy gourd, wild betel and water spinach show “no data”: no measured value was found. Sources are listed at the bottom (USDA FoodData Central, a 2026 Thai vitamin K study, CHEST 2012, a Thai food–warfarin review and MedlinePlus).','The printed patient sheet (Print table) now has a “Foods and your INR” section on its lower half: what to keep steady, what may raise or lower the INR, and the high vitamin K foods.','The guideline references (CHEST, ASH, ACC, AHA/ASA, Thai HA, ESC, NICE) moved from under the title to the bottom of the page.','Orderly weekly schedule, easier for patients and doctors to remember: the usual dose now runs from Monday and the other dose takes the last days of the week in one block — for example 2 mg Monday–Friday and 3 mg Saturday–Sunday (before, the odd-dose days were scattered through the week). Days with no dose are still spread out, so the patient never skips several days in a row. You can still move doses to other days by hand.'],bugs:[]},
+  {version:'v1.11.0',date:'October 27, 2026',features:['Download PNG (next to Print table in Simple mode) saves the patient sheet — weekly table and the foods section — as an image, the same layout as the printout, to send to the patient by phone or chat. Needs an internet connection the first time (the image tool, html2canvas-pro, loads from jsDelivr).','Foods &amp; INR: a new button in the header (and next to Print in Simple mode) opens a popup listing foods and herbs that may raise the INR (e.g. fish oil, mango, grapefruit, goji berry, dong quai, cranberry, alcohol) or lower it (high vitamin K foods, avocado in large amounts, soy milk, ginseng, multivitamins), with the CHEST 2012 level of evidence, and a table of vitamin K (µg per 100 g) in 41 foods, including Thai vegetables such as คะน้า, ผักชี, โหระพา, ผักเชียงดา and ผักหวานบ้าน. Holy basil, ivy gourd, wild betel and water spinach show “no data”: no measured value was found. Sources are listed at the bottom (USDA FoodData Central, a 2026 Thai vitamin K study, CHEST 2012, a Thai food–warfarin review and MedlinePlus).','The printed patient sheet (Print table) now has a “Foods and your INR” section on its lower half, in two colour-coded columns: ↓ may lower the INR (green vegetables high in vitamin K — eat the same amount every week, do not stop suddenly — plus items to ask about first) and ↑ may raise the INR (avoid, or ask your doctor first).','The guideline references (CHEST, ASH, ACC, AHA/ASA, Thai HA, ESC, NICE) moved from under the title to the bottom of the page.','Orderly weekly schedule, easier for patients and doctors to remember: the usual dose now runs from Monday and the other dose takes the last days of the week in one block — for example 2 mg Monday–Friday and 3 mg Saturday–Sunday (before, the odd-dose days were scattered through the week). Days with no dose are still spread out, so the patient never skips several days in a row. You can still move doses to other days by hand.'],bugs:[]},
   {version:'v1.9.4',date:'October 26, 2026',features:['The six sample cases now use all tablet strengths (1, 2, 3, 4 and 5 mg), like a new case, so their schedules match what you get by default.'],bugs:[]},
   {version:'v1.9.3',date:'October 19, 2026',features:['All tablet strengths (1, 2, 3, 4 and 5 mg) are ticked in stock by default; untick the ones you do not have.','4 mg warfarin tablets: tick 4 mg under tablets in stock (Simple and Detailed) to use them in the schedule, or drag a 4 mg tablet from the tablet tray. The 4 mg tablet is yellow.'],bugs:[]},
   {version:'v1.8.1',date:'October 14, 2026',features:['Thai language: a 🇹🇭 ไทย / 🇬🇧 EN switch in the header translates the Simple view — calculator, weekly table, tablet tray, Thai nomogram, TTR calculator, messages and the copied text (Detailed view stays in English). The app remembers your choice.','“Clear table” in the tablet tray empties the week so you can build it tablet by tablet (with Undo).','Edit the Simple-mode table tablet by tablet: drag a whole tablet (1, 2, 3 or 5 mg) from the tablet tray onto a day to add it, drag a tablet from one day to another to move it, or drag it back to the tray to remove it. In the table, click a tablet to split it (whole → ½ → ¼ → whole), drag it to another day to move it, or press and hold it to remove it (with Undo); this works with a mouse and on a phone. The weekly total, % change and tablets to dispense update as you go; “Undo hand edits” returns to the calculated schedule.','Simple mode is now the default view (Detailed is one tap away and the app remembers your choice).','Move doses between days in the Simple-mode table: drag a day onto another, or tap two days, to swap their doses — for patients who want the smaller (or larger) dose on particular days. The chosen days are kept when the dose is changed: the smallest doses stay on the days the patient picked. “Reset to suggested days” undoes it; Copy and Print follow the new order.'],bugs:['Print printed a blank page in dark mode (white text on white paper); printing now always uses the light colours. On phones and in the Cardio suite tab, Print table printed the whole app instead of the weekly table.',]},
