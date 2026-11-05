@@ -568,7 +568,7 @@ details.sm-card[open]>summary{margin-bottom:12px}
 .fd-tip ul{margin:4px 0 0;padding-left:18px}
 .fd-h{font:700 15px/1.3 var(--cond);margin:16px 0 6px;display:flex;align-items:center;gap:8px}
 .fd-h::before{content:"";width:10px;height:10px;border-radius:3px;background:var(--fk,var(--acc));flex:none}
-.fd-h.up{--fk:var(--c-a)}.fd-h.dn{--fk:var(--c-r)}.fd-h.vk{--fk:var(--c-c)}
+.fd-h.up{--fk:var(--c-a)}.fd-h.dn{--fk:var(--c-r)}.fd-h.vk{--fk:var(--c-c)}.fd-h.av{--fk:var(--ink-3)}
 .fd-sub{font-size:12.5px;color:var(--ink-3);margin:0 0 6px}
 .fd-tw{overflow-x:auto;border:1px solid var(--rule);border-radius:10px}
 .fd-t{width:100%;border-collapse:collapse;font-size:13px}
@@ -915,16 +915,21 @@ const todayIdx=()=>(new Date().getDay()+6)%7;
 const IX=[
  {id:'amio',name:'Amiodarone',re:/\b(amiodarone|cordarone)\b/i,eff:'up',pct:-30,rng:'↓ 25–50%',note:'CYP2C9/1A2/3A4 inhibition. Onset 1–2 wk, peak 6–8 wk; persists 1–3 months after stopping. Rule of thumb: ↓25% (100 mg/d) → ↓40% (400 mg/d).'},
  {id:'dron',name:'Dronedarone',re:/\b(dronedarone|multaq)\b/i,eff:'up',pct:0,rng:'monitor',note:'Mild ↑INR — INR within 1 week.'},
+ {id:'propaf',name:'Propafenone',re:/\b(propafenone|rytmonorm)\b/i,eff:'up',pct:0,rng:'monitor',note:'↑INR — listed by Thai HA 2010 and CHEST 2012 (highly probable); CYP1A2 inhibitor in the FDA label. Recheck INR when starting or stopping.'},
+ {id:'propra',name:'Propranolol',re:/\b(propranolol|inderal)\b/i,eff:'up',pct:0,rng:'monitor',note:'↑INR — listed by Thai HA 2010 and CHEST 2012 (highly probable); CYP1A2 inhibitor in the FDA label. Recheck INR when starting or stopping.'},
+ {id:'dilt',name:'Diltiazem',re:/\b(diltiazem|herbesser|cardizem)\b/i,eff:'up',pct:0,rng:'monitor',note:'↑INR — CHEST 2012 (highly probable); CYP3A4 inhibitor in the FDA label. Recheck INR when starting or stopping.'},
  {id:'metro',name:'Metronidazole / tinidazole',re:/\b(metronidazole|flagyl|tinidazole)\b/i,eff:'up',pct:-30,rng:'↓ 25–35%',note:'Potent CYP2C9 inhibition (S-warfarin). Prefer an alternative; INR in 3–5 days.'},
  {id:'smx',name:'Co-trimoxazole',re:/\b(co-?trimoxazole|bactrim|septrin|tmp-?smx|sulfamethoxazole|trimethoprim)\b/i,eff:'up',pct:-20,rng:'↓ 10–20%',note:'CYP2C9 inhibition + protein-binding displacement; INR in 3–5 days.'},
  {id:'fluc',name:'Fluconazole',re:/\b(fluconazole|diflucan)\b/i,eff:'up',pct:-25,rng:'↓ 25–30%',note:'Dose-dependent CYP2C9 inhibition; effect lasts days after stopping (long t½).'},
  {id:'azole',name:'Vori-/itra-/posa-/ketoconazole',re:/\b(voriconazole|itraconazole|posaconazole|ketoconazole)\b/i,eff:'up',pct:-15,rng:'↓ 10–25%',note:'INR in 3–5 days.'},
  {id:'mico',name:'Miconazole (incl. oral gel)',re:/\b(miconazole|daktarin)\b/i,eff:'up',pct:-25,rng:'avoid / ↓ ≥ 25%',note:'Oral gel is absorbed — marked INR rises reported. Avoid.'},
  {id:'macro',name:'Clarithromycin / erythromycin',re:/\b(clarithromycin|erythromycin|klacid)\b/i,eff:'up',pct:-15,rng:'↓ 10–15%',note:'CYP3A4 (R-warfarin) inhibition; INR in 3–5 days.'},
+ {id:'rito',name:'Ritonavir (boosted protease inhibitors)',re:/\b(ritonavir|norvir|kaletra|lopinavir)\b/i,eff:'mixed',pct:0,rng:'varies',note:'CHEST 2012 lists ritonavir under both ↑INR and ↓INR; the FDA label lists ritonavir-boosted protease inhibitors as CYP3A4 inhibitors. Direction varies — check INR closely when starting or stopping.'},
  {id:'azith',name:'Azithromycin',re:/\b(azithromycin|zithromax)\b/i,eff:'up',pct:0,rng:'monitor',note:'Case reports of ↑INR; check INR during course.'},
  {id:'fq',name:'Fluoroquinolone',re:/\b(ciprofloxacin|levofloxacin|moxifloxacin|norfloxacin|ofloxacin)\b/i,eff:'up',pct:-10,rng:'↓ 0–10%',note:'Variable ↑INR; INR in 3–5 days.'},
  {id:'abx',name:'Broad-spectrum β-lactam',re:/\b(amoxicillin|augmentin|amoxiclav|ceftriaxone|cefoperazone|sulperazon|piperacillin|tazocin|meropenem|imipenem|ertapenem|ceftazidime|cefepime|cefixime|cefdinir|cefuroxime)\b/i,eff:'up',pct:0,rng:'monitor',note:'Gut-flora vitamin K loss + acute illness ↑INR; cefoperazone (NMTT side chain) can cause hypoprothrombinaemia.'},
  {id:'rif',name:'Rifampicin / rifamycins',re:/\b(rifampi?cin|rifampin|rifadin|rifapentine|rifabutin)\b/i,eff:'down',pct:50,rng:'↑ 50–100% (often 2–3×)',note:'Strong induction starting ~1 wk, maximal 2–3 wk; persists 2–5 wk after stopping — step the dose back down then. INR weekly.'},
+ {id:'inh',name:'Isoniazid',re:/\b(isoniazid|INH)\b/i,eff:'up',pct:0,rng:'monitor',note:'↑INR — CHEST 2012 (highly probable); CYP3A4 inhibitor in the FDA label. Often given with rifampicin (↓INR), so the net effect varies — check INR closely at the start and when the regimen changes.'},
  {id:'cbz',name:'Carbamazepine',re:/\b(carbamazepine|tegretol)\b/i,eff:'down',pct:30,rng:'↑ 25–100%',note:'Induction over 1–2 weeks; INR weekly.'},
  {id:'pb',name:'Phenobarbital',re:/\b(phenobarb\w*)\b/i,eff:'down',pct:30,rng:'↑ 30–60%',note:'Induction over 1–2 weeks.'},
  {id:'pht',name:'Phenytoin',re:/\b(phenytoin|dilantin)\b/i,eff:'mixed',pct:0,rng:'biphasic',note:'Early ↑INR then ↓INR (induction); warfarin also raises phenytoin levels. INR weekly.'},
@@ -932,7 +937,7 @@ const IX=[
  {id:'grise',name:'Griseofulvin',re:/\bgriseofulvin\b/i,eff:'down',pct:15,rng:'↑ 10–25%',note:'Induction.'},
  {id:'chol',name:'Cholestyramine',re:/\b(cholestyramine|questran)\b/i,eff:'down',pct:0,rng:'separate',note:'Binds warfarin — give warfarin ≥ 1 h before or 4–6 h after.'},
  {id:'sucr',name:'Sucralfate',re:/\bsucralfate\b/i,eff:'down',pct:0,rng:'separate',note:'Separate by 2 h.'},
- {id:'feed',name:'Enteral feed / vit K supplement',re:/\b(enteral feed|tube feed|ng feed|blenderized|ensure)\b/i,eff:'down',pct:0,rng:'monitor',note:'Vitamin K content and binding ↓INR; hold feed 1 h before/after warfarin, keep intake consistent.'},
+ {id:'feed',name:'Enteral feed / vit K supplement',re:/\b(enteral feed|tube feed|ng feed|blenderized|ensure|glakay|menatetrenone|vitamin k2)\b/i,eff:'down',pct:0,rng:'monitor',note:'Vitamin K content and binding ↓INR; hold feed 1 h before/after warfarin, keep intake consistent. Vitamin K products such as Glakay® are listed as warfarin antagonists by Thai HA 2010 — avoid.'},
  {id:'fib',name:'Fenofibrate / gemfibrozil',re:/\b(fenofibrate|gemfibrozil|lipanthyl)\b/i,eff:'up',pct:-10,rng:'↓ 10–20%',note:'INR within 1–2 weeks.'},
  {id:'statin',name:'Statin (rosuva/simva/fluva/lova)',re:/\b(rosuvastatin|simvastatin|fluvastatin|lovastatin|crestor)\b/i,eff:'up',pct:0,rng:'monitor',note:'Small ↑INR on starting; atorva/prava minimal.'},
  {id:'allo',name:'Allopurinol',re:/\b(allopurinol|zyloric)\b/i,eff:'up',pct:0,rng:'monitor',note:'Variable ↑INR.'},
@@ -943,9 +948,10 @@ const IX=[
  {id:'tram',name:'Tramadol',re:/\btramadol\b/i,eff:'up',pct:0,rng:'monitor',note:'Case reports of ↑INR.'},
  {id:'cape',name:'Capecitabine / 5-FU',re:/\b(capecitabine|xeloda|fluorouracil|5-?fu)\b/i,eff:'up',pct:-25,rng:'↓ ≥ 25%, INR weekly',note:'Boxed warning — large INR rises, can appear after the course ends. Consider LMWH instead.'},
  {id:'tamox',name:'Tamoxifen',re:/\btamoxifen\b/i,eff:'up',pct:-15,rng:'↓ 10–20%',note:'INR within 1–2 weeks.'},
- {id:'cimet',name:'Cimetidine',re:/\bcimetidine\b/i,eff:'up',pct:-10,rng:'↓ 0–10%',note:'Prefer famotidine / PPI (omeprazole effect is minor).'},
- {id:'ster',name:'Systemic corticosteroid',re:/\b(prednisolone|prednisone|dexamethasone|methylprednisolone|hydrocortisone)\b/i,eff:'up',pct:0,rng:'monitor',note:'High doses can ↑INR; ↑GI-bleed risk — add PPI.'},
- {id:'herb',name:'Herbal / fish oil',re:/\b(ginkgo|dong quai|danshen|garlic|ginseng|fish oil|omega-?3|turmeric|curcumin)\b/i,eff:'bleed',pct:0,rng:'bleeding',note:'Antiplatelet effect ± ↑INR (dong quai, danshen). Advise stopping.'},
+ {id:'cimet',name:'Cimetidine',re:/\bcimetidine\b/i,eff:'up',pct:-10,rng:'↓ 0–10%',note:'Listed by Thai HA 2010, CHEST 2012 and the FDA label. PPIs and famotidine are also on those lists, so recheck INR after any change.'},
+ {id:'ppi',name:'Proton-pump inhibitor',re:/\b(omeprazole|esomeprazole|lansoprazole|pantoprazole|rabeprazole|dexlansoprazole|nexium|losec|controloc|pariet)\b/i,eff:'up',pct:0,rng:'monitor',note:'Thai HA 2010 lists PPIs as ↑INR and CHEST 2012 lists omeprazole (highly probable); the FDA label lists omeprazole as a CYP1A2 inducer. The official lists disagree — no dose change; recheck INR when starting or stopping.'},
+ {id:'ster',name:'Systemic corticosteroid',re:/\b(prednisolone|prednisone|dexamethasone|methylprednisolone|hydrocortisone)\b/i,eff:'mixed',pct:0,rng:'variable',note:'INR may rise or fall: the FDA label lists prednisone as a CYP3A4 inducer and asks for closer INR checks with short-term corticosteroids; CHEST 2012 does not list it. Thai HA 2010 advises avoiding steroids (including traditional ยาลูกกลอน pills). ↑GI-bleed risk — add PPI.'},
+ {id:'herb',name:'Herbal / fish oil',re:/\b(ginkgo|dong quai|danshen|garlic|ginseng|fish oil|omega-?3|turmeric|curcumin|vitamin ?e)\b/i,eff:'bleed',pct:0,rng:'bleeding',note:'Antiplatelet effect ± ↑INR (dong quai, danshen; Thai HA 2010 names Ginkgo, fish oil and vitamin E). Advise stopping.'},
  {id:'asa',name:'Aspirin',re:/\b(aspirin|asa|aspent|cardiprin)\b/i,eff:'bleed',pct:0,rng:'bleeding',note:'↑ major bleeding ~1.5–2×. Keep only with a clear indication (e.g. recent ACS/stent, On-X valve) and add PPI.'},
  {id:'p2y',name:'P2Y12 inhibitor',re:/\b(clopidogrel|plavix|apolets|ticagrelor|brilinta|prasugrel|effient)\b/i,eff:'bleed',pct:0,rng:'bleeding',note:'With warfarin use clopidogrel (not ticagrelor/prasugrel), shortest duration, INR at lower end of range, PPI.'},
  {id:'nsaid',name:'NSAID / coxib',re:/\b(ibuprofen|naproxen|diclofenac|voltaren|mefenamic|ponstan|piroxicam|meloxicam|indomethacin|celecoxib|celebrex|etoricoxib|arcoxia|ketorolac|parecoxib)\b/i,eff:'bleed',pct:0,rng:'avoid',note:'GI bleeding ↑3–6×; some ↑INR. Use paracetamol / topical NSAID instead.'},
@@ -2385,32 +2391,47 @@ const FOOD_UP=[
   {en:'Dong quai',th:'โกฐเชียง',ev:'p',r:4},
   {en:'Danshen',th:'ตันเซิน',ev:'p',r:4},
   {en:'Goji berry (Lycium barbarum)',th:'เก๋ากี้',ev:'p',r:4},
-  {en:'Cranberry',th:'แครนเบอร์รี',ev:'th',r:5}];
+  {en:'Ginkgo biloba',th:'แปะก๊วย',ev:'tg',r:7},
+  {en:'Vitamin E (affects platelets)',th:'วิตามินอี (มีผลต่อเกล็ดเลือด)',pen:'Vitamin E',pth:'วิตามินอี',ev:'tg',r:7},
+  {en:'Cranberry',th:'แครนเบอร์รี',ev:'cr',r:5}];
 const FOOD_DN=[
   {en:'Foods high in vitamin K, tube feeds',th:'อาหารที่มีวิตามิน K สูง อาหารทางสายยาง',pen:'Tube feeds',pth:'อาหารทางสายยาง',ev:'hp',r:4},
   {en:'Avocado (large amounts)',th:'อะโวคาโด (ปริมาณมาก)',ev:'hp',r:4},
   {en:'Soy milk',th:'นมถั่วเหลือง',ev:'p',r:4},
   {en:'Ginseng',th:'โสม',ev:'p',r:4},
   {en:'Multivitamin supplements',th:'วิตามินรวม',ev:'p',r:4},
-  {en:'Sushi with seaweed',th:'ซูชิที่มีสาหร่าย',ev:'ps',r:4}];
+  {en:'Sushi with seaweed',th:'ซูชิที่มีสาหร่าย',ev:'ps',r:4},
+  {en:'Vitamin K products (e.g. Glakay®, menatetrenone)',th:'ผลิตภัณฑ์วิตามินเค เช่น Glakay® (menatetrenone)',pen:'Vitamin K products (Glakay®)',pth:'ผลิตภัณฑ์วิตามินเค (Glakay®)',ev:'tg',r:7}];
+/* Thai HA 2010 p. 24 lists these as products to avoid but does not say which way they move the INR */
+const FOOD_AVOID=[
+  {en:'Vegetable-extract tablets',th:'ผักสกัดอัดเม็ด',ev:'av',r:7},
+  {en:'Chlorophyll tablets',th:'คลอโรฟิลล์อัดเม็ด',ev:'av',r:7},
+  {en:'Alfalfa',th:'อัลฟาฟ่า',ev:'av',r:7},
+  {en:'Green tea (listed with supplements)',th:'ชาเขียว (อยู่ในกลุ่มอาหารเสริม)',pen:'Green tea',pth:'ชาเขียว',ev:'av',r:7},
+  {en:'High-dose vitamin K',th:'วิตามินเคขนาดสูง',ev:'av',r:7},
+  {en:'Coenzyme Q10',th:'โคเอนไซม์คิวเทน',ev:'av',r:7},
+  {en:'Steroids, including ยาลูกกลอน pills',th:'สเตียรอยด์ รวมถึงยาลูกกลอน',pen:'Steroids, including ยาลูกกลอน pills',pth:'สเตียรอยด์ รวมถึงยาลูกกลอน',ev:'av',r:7}];
 const FOOD_REFS=[
   'U.S. Department of Agriculture, Agricultural Research Service. FoodData Central — SR Legacy (April 2018), vitamin K (phylloquinone) per 100 g. fdc.nal.usda.gov (FDC ID shown for each food).',
   'Rodseeda C, Chansamut N. Vitamin K1 in indigenous vegetables from upper northern Thailand: HPLC measurement and scenario-based intake assessment relevant to warfarin dietary counseling. J Adv Pharm Technol Res 2026;17(3):208–12. doi:10.4103/JAPTR.JAPTR_42_26',
   'Damon M, Zhang NZ, Haytowitz DB, Booth SL. Phylloquinone (vitamin K1) content of vegetables. J Food Compos Anal 2005;18:751–8 — green leafy vegetables &gt; 100, roots and tubers &lt; 10 µg/100 g (basis for the High / Low bands).',
   'Ageno W, Gallus AS, Wittkowsky A, et al. Oral anticoagulant therapy. CHEST 2012;141(2 Suppl):e44S–e88S, Table 1 (data from Holbrook AM, et al. Arch Intern Med 2005;165:1095–106). doi:10.1378/chest.11-2292',
   'Poowaruttanawiwit P, Sonthisombut P, Sakunrag I, et al. Food–warfarin interaction: facts and fictions (ปฏิกิริยาระหว่างอาหารกับวาร์ฟาริน: ความจริงกับความเชื่อ). Thai J Pharm Pract 2022;14(3) — cranberry has the strongest food evidence for a rise in INR.',
-  'MedlinePlus. Taking warfarin. U.S. National Library of Medicine; reviewed 1 Jan 2025 — keep the amount of these foods steady day-to-day and week-to-week; do not drink alcohol; ask before new medicines, vitamins, supplements or herbs.'];
+  'MedlinePlus. Taking warfarin. U.S. National Library of Medicine; reviewed 1 Jan 2025 — keep the amount of these foods steady day-to-day and week-to-week; do not drink alcohol; ask before new medicines, vitamins, supplements or herbs.',
+  'Heart Association of Thailand under the Royal Patronage of H.M. the King. แนวทางการรักษาผู้ป่วยด้วยยาต้านการแข็งตัวของเลือดชนิดรับประทาน (Guideline for treatment with oral anticoagulants) [Thai HA 2010], pp. 21–24 — common drugs that raise or lower the warfarin effect; supplements, herbs and products to avoid.',
+  'U.S. Food and Drug Administration. Warfarin sodium tablets, prescribing information (Teva, rev. 2025; openFDA), §7 Drug interactions, Tables 2–3, and patient counselling — eat a normal, balanced diet with a consistent vitamin K intake; avoid drastic changes such as large amounts of leafy green vegetables.'];
 const fdName=f=>LANG==='th'?`${f.th} <small>${f.en}</small>`:`${f.en} <small>${f.th}</small>`;
-const fdEv=f=>f.ev==='th'?L('Good (Thai review)','หลักฐานดี (บทความไทย)'):L(EV[f.ev][0],EV[f.ev][1]);
+const fdEv=f=>({tg:L('Thai HA 2010','แนวทางไทย 2010'),av:L('Thai HA 2010: avoid','แนวทางไทย: ควรเลี่ยง'),cr:L('Thai review; not in CHEST','บทความไทย ไม่อยู่ใน CHEST')}[f.ev])||L(EV[f.ev][0],EV[f.ev][1]);
 const fdBand=v=>v==null?'na':v>=100?'hi':v>=10?'mid':'lo';
 const FD_BANDS={hi:['High — 100 µg or more','สูง — ตั้งแต่ 100 ไมโครกรัม'],mid:['Moderate — 10 to 99 µg','ปานกลาง — 10–99 ไมโครกรัม'],lo:['Low — under 10 µg','ต่ำ — น้อยกว่า 10 ไมโครกรัม'],na:['No measured value in these sources','ยังไม่มีค่าที่วัดได้ในแหล่งอ้างอิงนี้']};
 const fdTip=()=>L('<b>Keep it steady, don’t avoid it.</b><ul><li>Green vegetables are fine — eat about the same amount each day and each week. A sudden big increase can lower the INR; a sudden stop can raise it.</li><li>Do not drink alcohol.</li><li>Ask your doctor or pharmacist before any new medicine, vitamin, supplement or herb.</li><li>Tell the clinic if your diet changes a lot (illness, fasting, a new diet).</li></ul>',
-  '<b>กินให้สม่ำเสมอ ไม่ต้องงด</b><ul><li>ผักใบเขียวกินได้ — กินปริมาณใกล้เคียงกันทุกวันและทุกสัปดาห์ การกินเพิ่มขึ้นมากทันทีอาจทำให้ INR ลดลง การหยุดกินทันทีอาจทำให้ INR สูงขึ้น</li><li>งดดื่มแอลกอฮอล์</li><li>ปรึกษาแพทย์หรือเภสัชกรก่อนใช้ยา วิตามิน อาหารเสริม หรือสมุนไพรใหม่ทุกชนิด</li><li>แจ้งคลินิกเมื่ออาหารเปลี่ยนไปมาก (เจ็บป่วย อดอาหาร เปลี่ยนสูตรอาหาร)</li></ul>').replace('</b>','</b><sup class="fr">6</sup>');
+  '<b>กินให้สม่ำเสมอ ไม่ต้องงด</b><ul><li>ผักใบเขียวกินได้ — กินปริมาณใกล้เคียงกันทุกวันและทุกสัปดาห์ การกินเพิ่มขึ้นมากทันทีอาจทำให้ INR ลดลง การหยุดกินทันทีอาจทำให้ INR สูงขึ้น</li><li>งดดื่มแอลกอฮอล์</li><li>ปรึกษาแพทย์หรือเภสัชกรก่อนใช้ยา วิตามิน อาหารเสริม หรือสมุนไพรใหม่ทุกชนิด</li><li>แจ้งคลินิกเมื่ออาหารเปลี่ยนไปมาก (เจ็บป่วย อดอาหาร เปลี่ยนสูตรอาหาร)</li></ul>').replace('</b>','</b><sup class="fr">6, 8</sup>');
 function foodHtml(){
   let h=`<div class="fd-tip">${fdTip()}</div>`;
   const ix=(cls,title,sub,list)=>`<h3 class="fd-h ${cls}">${title}</h3><p class="fd-sub">${sub}</p><div class="fd-tw"><table class="fd-t"><thead><tr><th>${L('Food / herb','อาหาร / สมุนไพร')}</th><th>${L('Evidence','ระดับหลักฐาน')}</th></tr></thead><tbody>${list.map(f=>`<tr><td>${fdName(f)}<sup class="fr">${f.r}</sup></td><td><span class="fd-ev">${fdEv(f)}</span></td></tr>`).join('')}</tbody></table></div>`;
   h+=ix('up',L('May raise the INR — bleeding risk','อาจทำให้ INR สูงขึ้น — เสี่ยงเลือดออก'),L('Avoid, or keep to small, steady amounts and check the INR after starting.','ควรเลี่ยง หรือกินน้อยและสม่ำเสมอ และตรวจ INR หลังเริ่มกิน'),FOOD_UP);
-  h+=ix('dn',L('May lower the INR — clot risk','อาจทำให้ INR ลดลง — เสี่ยงลิ่มเลือด'),L('Green tea: CHEST rates an effect “highly improbable”, and brewed green tea has almost no vitamin K (table below).','ชาเขียว: CHEST ประเมินว่า “ไม่น่าจะมีผล” และชาเขียวที่ชงแล้วแทบไม่มีวิตามิน K (ดูตารางด้านล่าง)')+'<sup class="fr">4</sup>',FOOD_DN);
+  h+=ix('dn',L('May lower the INR — clot risk','อาจทำให้ INR ลดลง — เสี่ยงลิ่มเลือด'),L('Brewed green tea: CHEST rates an effect “highly improbable” and it has almost no vitamin K (table below), but Thai HA 2010 lists green tea among products to avoid (next table).','ชาเขียวที่ชงแล้ว: CHEST ประเมินว่า “ไม่น่าจะมีผล” และแทบไม่มีวิตามิน K (ดูตารางด้านล่าง) แต่แนวทางไทยจัดชาเขียวไว้ในกลุ่มที่ควรเลี่ยง (ตารางถัดไป)')+'<sup class="fr">4, 7</sup>',FOOD_DN);
+  h+=ix('av',L('Also avoid — Thai HA 2010','ควรเลี่ยงเพิ่มเติม — แนวทางไทย 2010'),L('The guideline lists these but does not say whether they raise or lower the INR.','แนวทางระบุให้เลี่ยง แต่ไม่ได้ระบุว่าทำให้ INR สูงหรือต่ำ'),FOOD_AVOID);
   h+=`<h3 class="fd-h vk">${L('Vitamin K in foods','ปริมาณวิตามิน K ในอาหาร')}</h3><p class="fd-sub">${L('Micrograms (µg) of vitamin K per 100 g of raw food. The higher the number, the more important it is to eat a steady amount.','ไมโครกรัม (µg) ของวิตามิน K ต่ออาหารดิบ 100 กรัม ยิ่งตัวเลขสูง ยิ่งต้องกินในปริมาณที่สม่ำเสมอ')}<sup class="fr">3</sup></p>`;
   let rows='',last='';
   for(const f of FOOD_VK){const b=fdBand(f.v);if(b!==last){rows+=`<tr class="band b-${b}"><td colspan="2">${L(FD_BANDS[b][0],FD_BANDS[b][1])}</td></tr>`;last=b;}
@@ -2436,8 +2457,8 @@ function foodPrintHtml(){
     +`<div class="fp-na">${L('No measured value yet','ยังไม่มีค่าที่วัดได้')}: ${none.map(nm).join(', ')}</div>`
     +`<h5>${L('Ask before using','ปรึกษาก่อนใช้')}</h5>${ul(FOOD_DN)}</div>`
     +`<div class="fp-col up"><h4><span class="fp-ar">↑</span>${L('May RAISE the INR <small>bleeding risk</small>','อาจทำให้ INR <u>สูงขึ้น</u> <small>เสี่ยงเลือดออก</small>')}</h4>`
-    +`<h5>${L('Avoid, or ask your doctor first','ควรเลี่ยง หรือปรึกษาแพทย์ก่อน')}</h5>${ul(FOOD_UP)}</div></div>`
-    +`<div class="fp-refs">${L('Sources','แหล่งอ้างอิง')}: USDA FoodData Central SR Legacy; Rodseeda &amp; Chansamut, J Adv Pharm Technol Res 2026; CHEST 2012 (Ageno et al.) Table 1; Poowaruttanawiwit et al., Thai J Pharm Pract 2022; MedlinePlus “Taking warfarin” 2025.</div>`;
+    +`<h5>${L('Avoid, or ask your doctor first','ควรเลี่ยง หรือปรึกษาแพทย์ก่อน')}</h5>${ul(FOOD_UP)}<h5>${L('Also avoid — Thai guideline','ควรเลี่ยงเพิ่มเติม — แนวทางไทย')}</h5>${ul(FOOD_AVOID)}</div></div>`
+    +`<div class="fp-refs">${L('Sources','แหล่งอ้างอิง')}: USDA FoodData Central SR Legacy; Rodseeda &amp; Chansamut, J Adv Pharm Technol Res 2026; CHEST 2012 (Ageno et al.) Table 1; Thai HA 2010 guideline pp. 21–24; FDA warfarin label; Poowaruttanawiwit et al., Thai J Pharm Pract 2022; MedlinePlus “Taking warfarin” 2025.</div>`;
 }
 let fdReturn=null;
 function openFood(){
@@ -2454,13 +2475,14 @@ document.addEventListener('keydown',e=>{if(e.key==='Escape'&&!$('foodModal').hid
 document.addEventListener('click',e=>{if(e.target.closest('[data-food]'))openFood();});
 /* guideline references, moved from under the title to the bottom of the page */
 function renderPgRefs(){
-  $('pgRefs').innerHTML=`<b>${L('References','เอกสารอ้างอิง')}:</b> CHEST 2012/2022 · ASH 2018 · ACC 2020 · AHA/ASA 2022 · ${L('Thai warfarin nomogram','ตารางปรับขนาดยาวาร์ฟาริน')}: Thai HA 2010 · TTR: ESC 2024, NICE NG196 · ${L('Food sources: see','แหล่งข้อมูลอาหาร: ดูที่')} <a href="#" data-food>${L('Foods &amp; INR','อาหารกับ INR')}</a>.`;
+  $('pgRefs').innerHTML=`<b>${L('References','เอกสารอ้างอิง')}:</b> CHEST 2012/2022 · ASH 2018 · ACC 2020 · AHA/ASA 2022 · ${L('Thai warfarin nomogram','ตารางปรับขนาดยาวาร์ฟาริน')}: Thai HA 2010 · TTR: ESC 2024, NICE NG196 · ${L('Drug and food interactions: CHEST 2012 Table 1, FDA warfarin label §7, Thai HA 2010 pp. 21–24; dose percentages are empiric (only amiodarone has an official figure)','ปฏิกิริยาระหว่างยาและอาหาร: CHEST 2012 ตารางที่ 1, ฉลากยาวาร์ฟารินของ FDA ข้อ 7, แนวทางไทย 2010 หน้า 21–24; ค่าร้อยละการปรับยาเป็นค่าประมาณจากประสบการณ์ (มีเฉพาะอะมิโอดาโรนที่มีตัวเลขทางการ)')} · ${L('Food sources: see','แหล่งข้อมูลอาหาร: ดูที่')} <a href="#" data-food>${L('Foods &amp; INR','อาหารกับ INR')}</a>.`;
 }
 renderPgRefs();
 $('pgRefs').addEventListener('click',e=>{if(e.target.closest('a[data-food]'))e.preventDefault();});
 
 /* changelog */
 const changelogData=[
+  {version:'v1.11.1',date:'November 5, 2026',features:['Interactions checked against the Thai oral anticoagulant guideline (Thai HA 2010, pp. 21–24), CHEST 2012 Table 1 and the FDA warfarin label; the sources are now listed at the bottom of the page. New interaction rows (monitor only — no dose percentage, because no official source gives one): propafenone, propranolol, diltiazem, ritonavir, isoniazid and proton-pump inhibitors.','Foods &amp; INR: added Ginkgo biloba and vitamin E (may raise bleeding risk), vitamin K products such as Glakay® (may lower the INR), and a “Also avoid” list from the Thai guideline (vegetable-extract and chlorophyll tablets, alfalfa, green tea, high-dose vitamin K, coenzyme Q10, steroids including ยาลูกกลอน) — on the printed patient sheet too. Cranberry is now labelled “Thai review; not in CHEST”.'],bugs:['Cimetidine row said the omeprazole effect is minor; no official source says so (Thai HA 2010 and CHEST list PPIs as raising the INR, the FDA label lists omeprazole as an inducer), so the line was replaced. Corticosteroids were shown as ↑INR only; they are now “variable” (the FDA label lists prednisone as an inducer).']},
   {version:'v1.11.0',date:'October 27, 2026',features:['Download PNG (next to Print table in Simple mode) saves the patient sheet — weekly table and the foods section — as an image, the same layout as the printout, to send to the patient by phone or chat. Needs an internet connection the first time (the image tool, html2canvas-pro, loads from jsDelivr).','Foods &amp; INR: a new button in the header (and next to Print in Simple mode) opens a popup listing foods and herbs that may raise the INR (e.g. fish oil, mango, grapefruit, goji berry, dong quai, cranberry, alcohol) or lower it (high vitamin K foods, avocado in large amounts, soy milk, ginseng, multivitamins), with the CHEST 2012 level of evidence, and a table of vitamin K (µg per 100 g) in 41 foods, including Thai vegetables such as คะน้า, ผักชี, โหระพา, ผักเชียงดา and ผักหวานบ้าน. Holy basil, ivy gourd, wild betel and water spinach show “no data”: no measured value was found. Sources are listed at the bottom (USDA FoodData Central, a 2026 Thai vitamin K study, CHEST 2012, a Thai food–warfarin review and MedlinePlus).','The printed patient sheet (Print table) now has a “Foods and your INR” section on its lower half, in two colour-coded columns: ↓ may lower the INR (green vegetables high in vitamin K — eat the same amount every week, do not stop suddenly — plus items to ask about first) and ↑ may raise the INR (avoid, or ask your doctor first).','The guideline references (CHEST, ASH, ACC, AHA/ASA, Thai HA, ESC, NICE) moved from under the title to the bottom of the page.','Orderly weekly schedule, easier for patients and doctors to remember: the usual dose now runs from Monday and the other dose takes the last days of the week in one block — for example 2 mg Monday–Friday and 3 mg Saturday–Sunday (before, the odd-dose days were scattered through the week). Days with no dose are still spread out, so the patient never skips several days in a row. You can still move doses to other days by hand.'],bugs:[]},
   {version:'v1.9.4',date:'October 26, 2026',features:['The six sample cases now use all tablet strengths (1, 2, 3, 4 and 5 mg), like a new case, so their schedules match what you get by default.'],bugs:[]},
   {version:'v1.9.3',date:'October 19, 2026',features:['All tablet strengths (1, 2, 3, 4 and 5 mg) are ticked in stock by default; untick the ones you do not have.','4 mg warfarin tablets: tick 4 mg under tablets in stock (Simple and Detailed) to use them in the schedule, or drag a 4 mg tablet from the tablet tray. The 4 mg tablet is yellow.'],bugs:[]},
